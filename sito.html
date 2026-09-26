@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PeptidesValtellina — Molecole tracciabili</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #F4F7F9;
+    --text: #1A1A1A;
+    --muted: #6b7280;
+    --green: #2A4B42;
+    --green-dark: #1f3a33;
+    --teal: #3a4d46;
+    --border: #e7e5e4;
+    --radius: 0.5rem;
+    --font-serif: 'Playfair Display', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  img { display: block; max-width: 100%; }
+  .font-serif { font-family: var(--font-serif); }
+  .mono { font-family: var(--font-mono); }
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: rgba(42,75,66,0.85);
+  }
+
+  /* Navbar */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    transition: all 0.4s ease;
+  }
+  .nav.scrolled {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(231,229,228,0.6);
+  }
+  .nav-inner {
+    max-width: 1280px; margin: 0 auto; padding: 0 24px;
+    height: 80px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: baseline; gap: 8px; }
+  .brand .name { font-family: var(--font-serif); font-size: 20px; letter-spacing: -0.02em; }
+  .brand .tag { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(42,75,66,0.7); }
+  .nav-links { display: flex; align-items: center; gap: 40px; }
+  .nav-links a { font-size: 14px; color: #525252; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  <!--.btn-green {
+    padding: 10px 20px; border-radius: 999px; background: var(--green); color: #fff;
+    font-size: 14px; transition: background 0.2s;
+  }
+  <!--.btn-green:hover { background: var(--green-dark); }-->
+  .nav-toggle { display: none; }-->
+
+  /* Hero */
+  .hero {
+    position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; padding-top: 80px; text-align: center;
+  }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+  .hero-bg::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.4), transparent, rgba(255,255,255,0.6));
+  }
+  .ticker {
+    position: absolute; top: 50%; font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.4em; color: #a8a29e; white-space: nowrap;
+  }
+  .ticker.left { left: 24px; transform: translateY(-50%) rotate(-90deg); transform-origin: left center; }
+  .ticker.right { right: 24px; transform: translateY(-50%) rotate(90deg); transform-origin: right center; }
+  .hero-content { position: relative; z-index: 10; max-width: 900px; padding: 0 24px; }
+  .hero h1 {
+    font-family: var(--font-serif); font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05;
+    letter-spacing: -0.02em; margin-top: 32px;
+  }
+  .hero h1 .accent { font-style: italic; color: rgba(31,58,51,0.9); }
+  .hero p.sub { margin-top: 32px; font-size: 18px; color: #57534e; max-width: 640px; margin-left: auto; margin-right: auto; }
+  .hero-cta { margin-top: 40px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+  @media (min-width: 640px) { .hero-cta { flex-direction: row; justify-content: center; } }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 999px;
+    background: var(--green); color: #fff; font-size: 14px; transition: background 0.2s;
+  }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 999px;
+    border: 1px solid #d6d3d1; color: #292524; font-size: 14px; transition: border-color 0.2s;
+  }
+  .btn-outline:hover { border-color: #1c1917; }
+
+  /* Metric bar */
+  .metrics { background: #fff; border-top: 1px solid rgba(231,229,228,0.7); border-bottom: 1px solid rgba(231,229,228,0.7); }
+  .metrics-grid {
+    max-width: 1152px; margin: 0 auto; padding: 56px 24px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 24px;
+  }
+  @media (min-width: 1024px) { .metrics-grid { grid-template-columns: repeat(4, 1fr); } }
+  .metric { text-align: center; }
+  @media (min-width: 1024px) { .metric:not(:first-child) { border-left: 1px solid rgba(231,229,228,0.7); } }
+  .metric .val { font-family: var(--font-serif); font-size: clamp(2rem, 4vw, 3rem); }
+  .metric .lbl { margin-top: 8px; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: #78716c; }
+
+  /* Section heading */
+  .section { padding: 96px 0; }
+  @media (min-width: 1024px) { .section { padding: 128px 0; } }
+  .sec-head { text-align: center; margin-bottom: 64px; }
+  .sec-head .label { margin-bottom: 16px; display: block; }
+  .sec-head h2 { font-family: var(--font-serif); font-size: clamp(1.875rem, 4vw, 3rem); letter-spacing: -0.02em; }
+  .sec-head p { margin-top: 16px; color: #57534e; max-width: 560px; margin-left: auto; margin-right: auto; }
+
+  /* Product grid */
+  .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(4, 1fr); gap: 32px; } }
+  .pcard { display: block; }
+  .pcard .imgwrap {
+    position: relative; aspect-ratio: 1; border-radius: 16px; background: #fafaf9;
+    border: 1px solid rgba(231,229,228,0.6); overflow: hidden; margin-bottom: 16px;
+  }
+  .pcard .imgwrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .pcard:hover .imgwrap img { transform: scale(1.03); }
+  .pcard .purity {
+    position: absolute; top: 12px; right: 12px; font-family: var(--font-mono); font-size: 9px;
+    text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.9);
+    padding: 4px 8px; border-radius: 999px; color: var(--green);
+  }
+  .pcard h3 { font-family: var(--font-serif); font-size: 18px; }
+  .pcard .price { font-size: 14px; color: #78716c; margin-top: 4px; }
+  .center-btn { text-align: center; margin-top: 56px; }
+
+  /* Category cards */
+  .cat-section { background: var(--bg-soft); }
+  .cat-grid { display: grid; gap: 24px; max-width: 1024px; margin: 0 auto; }
+  @media (min-width: 768px) { .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; } }
+  .catcard {
+    background: #fff; border: 1px solid rgba(231,229,228,0.7); border-radius: 40px; padding: 32px;
+    transition: box-shadow 0.5s;
+  }
+  .catcard:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+  .catcard .imgwrap { aspect-ratio: 16/10; border-radius: 32px; overflow: hidden; margin-bottom: 24px; background: #f5f5f4; }
+  .catcard .imgwrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s; }
+  .catcard:hover .imgwrap img { transform: scale(1.04); }
+  .catcard h3 { font-family: var(--font-serif); font-size: 24px; }
+  .catcard p { margin-top: 8px; font-size: 14px; color: #57534e; }
+  .catcard .explore { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; background: var(--green); color: #fff; font-size: 14px; }
+  .catcard .explore:hover { background: var(--green-dark); }
+  .feat-list { margin-top: 64px; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 40px; }
+  .feat-list .item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #57534e; }
+  .feat-list .dot { width: 6px; height: 6px; border-radius: 50%; background: #047857; }
+
+  /* Verified */
+  .verified { border-top: 1px solid rgba(231,229,228,0.7); }
+  .verified-grid { display: grid; gap: 64px; align-items: center; }
+  @media (min-width: 1024px) { .verified-grid { grid-template-columns: 1fr 1fr; } }
+  .verified .order-1 { order: 2; }
+  @media (min-width: 1024px) { .verified .order-1 { order: 1; } }
+  .verified h2 { font-family: var(--font-serif); font-size: clamp(1.875rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -0.02em; }
+  .verified p { margin-top: 24px; color: #57534e; max-width: 480px; }
+  .vmetrics { margin-top: 32px; display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; max-width: 420px; }
+  .vmetrics .val { font-family: var(--font-serif); font-size: 24px; }
+  .vmetrics .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #78716c; margin-top: 4px; }
+  .verified .imgwrap { aspect-ratio: 1; max-width: 420px; margin: 0 auto; }
+  .verified .imgwrap img { width: 100%; height: 100%; object-fit: contain; }
+
+  /* Footer */
+  footer { background: #0c0a09; color: #d6d3d1; padding-top: 96px; padding-bottom: 40px; }
+  .footer-top { display: grid; gap: 64px; padding-bottom: 80px; border-bottom: 1px solid #292524; }
+  @media (min-width: 1024px) { .footer-top { grid-template-columns: 1fr 1fr; } }
+  footer h2 { font-family: var(--font-serif); font-size: clamp(3rem, 6vw, 4.5rem); color: #fff; line-height: 0.95; }
+  footer .sub-p { margin-top: 24px; color: #a8a29e; max-width: 420px; }
+  .news-form { width: 100%; display: flex; align-items: flex-end; }
+  .news-input { width: 100%; border-bottom: 1px solid #44403c; padding-bottom: 12px; display: flex; }
+  .news-input input { flex: 1; background: transparent; border: none; color: #fff; font-size: 18px; outline: none; font-family: inherit; }
+  .news-input input::placeholder { color: #78716c; }
+  .news-input button { color: #fff; }
+  .news-sent { margin-top: 12px; font-size: 14px; color: #34d399; }
+  .footer-cols { display: grid; grid-template-columns: repeat(2,1fr); gap: 32px; padding: 56px 0; }
+  @media (min-width: 768px) { .footer-cols { grid-template-columns: repeat(4,1fr); } }
+  .footer-cols h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #78716c; margin-bottom: 16px; }
+  .footer-cols ul { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .footer-cols a:hover { color: #fff; }
+  .footer-brand h4.brand-h { font-family: var(--font-serif); font-size: 20px; color: #fff; margin-bottom: 16px; }
+  .footer-brand p { font-size: 14px; color: #78716c; }
+  .footer-bottom { padding-top: 32px; border-top: 1px solid #292524; display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 768px) { .footer-bottom { flex-direction: row; justify-content: space-between; align-items: center; } }
+  .footer-bottom p { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #78716c; }
+
+  /* Products page */
+  .page-pad { padding-top: 128px; padding-bottom: 80px; }
+  .page-head { margin-bottom: 48px; }
+  .page-head .label { display: block; margin-bottom: 12px; }
+  .page-head h1 { font-family: var(--font-serif); font-size: clamp(2.25rem, 5vw, 3.75rem); letter-spacing: -0.02em; }
+  .catalog-grid { display: grid; gap: 40px; }
+  @media (min-width: 1024px) { .catalog-grid { grid-template-columns: 280px 1fr 300px; } }
+  .sidebar { display: flex; flex-direction: column; gap: 32px; }
+  @media (min-width: 1024px) { .sidebar { position: sticky; top: 112px; align-self: start; } }
+  .sidebar h3 { font-family: var(--font-serif); font-size: 20px; display: flex; justify-content: space-between; align-items: center; }
+  .clear { font-size: 12px; color: #78716c; }
+  .clear:hover { color: var(--text); }
+  .search { position: relative; }
+  .search input { width: 100%; padding: 10px 12px 10px 36px; font-size: 14px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-family: inherit; }
+  .search input:focus { border-color: #1c1917; }
+  .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #a8a29e; }
+  .filter-group h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #78716c; margin-bottom: 12px; }
+  .filter-group .opts { display: flex; flex-direction: column; gap: 8px; }
+  .filter-group label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #44403c; cursor: pointer; }
+  .filter-group input[type=checkbox] { accent-color: var(--green); }
+  .filter-group .count { color: #a8a29e; }
+  .range { width: 100%; accent-color: var(--green); }
+  .range-vals { display: flex; justify-content: space-between; font-size: 12px; color: #78716c; margin-top: 4px; }
+  .coa-box { background: var(--teal); color: #fff; border-radius: 12px; padding: 20px; }
+  .coa-box p { font-size: 14px; line-height: 1.5; margin-top: 12px; }
+  .grid-area p.count { font-size: 14px; color: #78716c; margin-bottom: 24px; }
+  .catalog-cards { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
+  @media (min-width: 1280px) { .catalog-cards { grid-template-columns: repeat(3,1fr); } }
+  .ccard { display: block; }
+  .ccard .imgwrap { position: relative; aspect-ratio: 1; border-radius: 16px; background: #fafaf9; border: 1px solid rgba(231,229,228,0.6); overflow: hidden; margin-bottom: 12px; }
+  .ccard .imgwrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+  .ccard:hover .imgwrap img { transform: scale(1.03); }
+  .heart { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; color: #a8a29e; }
+  .heart:hover { color: #e11d48; }
+  .oos { position: absolute; bottom: 12px; left: 12px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; background: #1c1917; color: #fff; padding: 4px 8px; border-radius: 999px; }
+  .ccard h3 { font-family: var(--font-serif); font-size: 18px; }
+  .ccard .price { font-size: 14px; color: #78716c; margin-top: 2px; }
+  .right-col { display: none; }
+  @media (min-width: 1024px) { .right-col { display: block; } }
+  .right-col .sticky { position: sticky; top: 112px; }
+  .right-col h3 { font-family: var(--font-serif); font-size: 24px; line-height: 1.1; }
+  .right-col p { margin-top: 16px; font-size: 14px; color: #57534e; line-height: 1.6; }
+  .right-col .btn-teal { margin-top: 24px; display: inline-flex; padding: 12px 20px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 14px; }
+  .right-col .btn-teal:hover { background: #2a3a34; }
+  .right-col .rcimg { margin-top: 40px; aspect-ratio: 1; border-radius: 50%; overflow: hidden; background: #f5f5f4; }
+  .right-col .rcimg img { width: 100%; height: 100%; object-fit: contain; }
+  .right-col .foot-label { margin-top: 24px; text-align: center; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #a8a29e; }
+
+  /* Detail */
+  .back { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #78716c; margin-bottom: 32px; }
+  .back:hover { color: var(--text); }
+  .detail-grid { display: grid; gap: 48px; }
+  @media (min-width: 1024px) { .detail-grid { grid-template-columns: 1fr 1fr; } }
+  .detail-left .main-img { aspect-ratio: 1; border-radius: 24px; background: #fafaf9; border: 1px solid rgba(231,229,228,0.6); overflow: hidden; }
+  .detail-left .main-img img { width: 100%; height: 100%; object-fit: cover; }
+  .thumbs { margin-top: 16px; display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+  .thumbs .t { aspect-ratio: 1; border-radius: 12px; background: #fafaf9; border: 1px solid rgba(231,229,228,0.6); overflow: hidden; }
+  .thumbs .t img { width: 100%; height: 100%; object-fit: cover; opacity: 0.7; }
+  @media (min-width: 1024px) { .detail-left { position: sticky; top: 112px; align-self: start; } }
+  .detail-right .label { display: block; margin-bottom: 12px; }
+  .detail-right h1 { font-family: var(--font-serif); font-size: clamp(2.25rem, 4vw, 3rem); letter-spacing: -0.02em; }
+  .detail-right .dprice { margin-top: 12px; font-size: 24px; }
+  .detail-right .desc { margin-top: 24px; color: #57534e; line-height: 1.6; }
+  .spec-table { margin-top: 32px; padding: 24px 0; border-top: 1px solid rgba(231,229,228,0.7); border-bottom: 1px solid rgba(231,229,228,0.7); display: flex; flex-direction: column; gap: 12px; }
+  .spec-row { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; }
+  .spec-row .k { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #78716c; white-space: nowrap; }
+  .spec-row .v { color: #292524; text-align: right; }
+  .spec-row .v.mono { font-family: var(--font-mono); font-size: 12px; }
+  .req-btn { margin-top: 32px; width: 100%; padding: 16px; border-radius: 999px; background: var(--green); color: #fff; font-size: 14px; transition: background 0.2s; }
+  .req-btn:hover { background: var(--green-dark); }
+  .req-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .dmetrics { margin-top: 48px; display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
+  .dmetrics .val { font-family: var(--font-serif); font-size: 24px; }
+  .dmetrics .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #78716c; margin-top: 4px; }
+  .coa-card { margin-top: 40px; background: var(--green-dark); color: #fff; border-radius: 16px; padding: 24px; }
+  .coa-card .head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .coa-card .head .tag { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: rgba(167,243,208,0.7); }
+  .coa-card .head .title { font-family: var(--font-serif); font-size: 18px; }
+  .coa-card .btns { display: flex; gap: 12px; }
+  .coa-card .btns button { flex: 1; padding: 10px; border-radius: 999px; background: rgba(255,255,255,0.1); font-size: 14px; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .coa-card .btns button:hover { background: rgba(255,255,255,0.2); }
+  .coa-card .note { margin-top: 16px; font-size: 12px; color: rgba(167,243,208,0.6); display: flex; align-items: center; gap: 8px; }
+
+  /* Legal pages */
+  .page-intro { margin-top: 16px; color: #57534e; max-width: 640px; }
+  .legal-grid { display: grid; gap: 48px; }
+  @media (min-width: 1024px) { .legal-grid { grid-template-columns: 240px 1fr; gap: 80px; } }
+  .legal-nav { display: flex; flex-direction: column; gap: 4px; }
+  @media (min-width: 1024px) { .legal-nav { position: sticky; top: 112px; align-self: start; } }
+  .legal-nav h4 { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; color: #78716c; margin-bottom: 12px; }
+  .legal-nav a { font-size: 14px; color: #57534e; padding: 8px 16px; border-radius: 999px; transition: background 0.2s, color 0.2s; }
+  .legal-nav a:hover { background: var(--bg-soft); color: var(--text); }
+  .legal-nav a.active { background: var(--green); color: #fff; }
+  .legal-body { max-width: 760px; }
+  .legal-body .updated { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #a8a29e; margin-bottom: 16px; }
+  .legal-body section { padding: 32px 0; border-top: 1px solid rgba(231,229,228,0.7); }
+  .legal-body h2 { font-family: var(--font-serif); font-size: 24px; letter-spacing: -0.01em; }
+  .legal-body p { margin-top: 12px; color: #57534e; }
+  .legal-body ul { margin-top: 12px; padding-left: 20px; color: #57534e; display: flex; flex-direction: column; gap: 6px; }
+  .legal-body a { color: var(--green); text-decoration: underline; }
+  .legal-note { margin-top: 16px; background: var(--bg-soft); border-radius: 16px; padding: 24px; font-size: 14px; color: #57534e; display: flex; gap: 12px; align-items: flex-start; }
+  .legal-note svg { flex-shrink: 0; margin-top: 3px; color: var(--green); }
+
+  /* Certificates page */
+  .cert-steps { display: grid; gap: 24px; margin-bottom: 80px; }
+  @media (min-width: 768px) { .cert-steps { grid-template-columns: repeat(3,1fr); } }
+  .cert-step { background: var(--bg-soft); border-radius: 32px; padding: 32px; }
+  .cert-step .n { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.2em; color: rgba(42,75,66,0.85); }
+  .cert-step h3 { font-family: var(--font-serif); font-size: 22px; margin-top: 12px; }
+  .cert-step p { margin-top: 8px; font-size: 14px; color: #57534e; }
+  .cert-grid { display: grid; gap: 24px; }
+  @media (min-width: 768px) { .cert-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (min-width: 1280px) { .cert-grid { grid-template-columns: repeat(3,1fr); } }
+  .cert-card { border: 1px solid rgba(231,229,228,0.7); border-radius: 32px; padding: 28px; display: flex; flex-direction: column; transition: box-shadow 0.5s; }
+  .cert-card:hover { box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+  .cert-card .top { display: flex; gap: 16px; align-items: center; }
+  .cert-card .thumb { width: 72px; height: 72px; border-radius: 16px; overflow: hidden; background: #fafaf9; border: 1px solid rgba(231,229,228,0.6); flex-shrink: 0; }
+  .cert-card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .cert-card .cat { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: #78716c; }
+  .cert-card h3 { font-family: var(--font-serif); font-size: 22px; }
+  .cert-card .spec-table { margin-top: 24px; padding: 20px 0; flex: 1; }
+  .cert-actions { margin-top: 20px; display: flex; gap: 12px; }
+  .cert-actions a { flex: 1; padding: 10px; border-radius: 999px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, border-color 0.2s; }
+  .cert-actions .primary { background: var(--green); color: #fff; }
+  .cert-actions .primary:hover { background: var(--green-dark); }
+  .cert-actions .ghost { border: 1px solid #d6d3d1; color: #292524; }
+  .cert-actions .ghost:hover { border-color: #1c1917; }
+  .cert-actions .disabled { opacity: 0.4; pointer-events: none; }
+  .cert-cta { margin-top: 80px; background: var(--green-dark); color: #fff; border-radius: 40px; padding: 48px 32px; text-align: center; }
+  .cert-cta h2 { font-family: var(--font-serif); font-size: clamp(1.75rem, 3vw, 2.25rem); letter-spacing: -0.02em; }
+  .cert-cta p { margin: 12px auto 0; max-width: 520px; color: rgba(255,255,255,0.7); font-size: 15px; }
+  .cert-cta a { margin-top: 28px; display: inline-flex; align-items: center; gap: 8px; padding: 14px 28px; border-radius: 999px; background: #fff; color: var(--green-dark); font-size: 14px; }
+
+  .pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const CONTACT_EMAIL = "info@peptidesvaltellina.it";
+const LAST_UPDATE = "26 settembre 2026";
+const OOS_LABEL = "Esaurito · In riassortimento";
+
+const PRODUCTS = [
+  { id:1, name:"KLOW", slug:"klow", category:"Recupero e Rigenerazione", price_eur:79.90, purity:"99% + HPLC", in_stock:true, description:"Blend di peptidi (GHK-Cu, BPC-157, TB-500, KPV) studiato per la rigenerazione dei tessuti, il recupero e la riparazione cellulare.", sequence:"GHK-Cu + BPC-157 + TB-500 + KPV", molecular_weight:"Blend", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430716/klow_to40n7.png" },
+  { id:2, name:"R3ta", slug:"r3ta", category:"Salute Metabolica", price_eur:89.90, purity:"99% + HPLC", in_stock:false, description:"Peptide triplo agonista dei recettori GIP, GLP-1 e glucagone, oggetto di ricerca per l'ottimizzazione metabolica.", sequence:"Agonista GIP / GLP-1 / GCGR", molecular_weight:"4731,3 g/mol", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430717/reta_s6my5h.png" },
+  { id:3, name:"GHK-Cu", slug:"ghk-cu", category:"Longevità", price_eur:24.95, purity:"99% + HPLC", in_stock:false, description:"Peptide di rame che supporta il rinnovamento della pelle e dei tessuti.", sequence:"Gly-His-Lys · Cu²⁺", molecular_weight:"403,9 g/mol", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430717/ghk-cu_u6hjpa.png" },
+  { id:4, name:"MOTS-c", slug:"mots-c", category:"Longevità", price_eur:49.90, purity:"99% + HPLC", in_stock:false, description:"Peptide di derivazione mitocondriale studiato per il metabolismo energetico e la vitalità cellulare.", sequence:"MRWQEMGYIFYPRKLR", molecular_weight:"2174,6 g/mol", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430717/mots-c_dbfeoy.png" },
+  { id:5, name:"Selank", slug:"selank", category:"Funzione Cognitiva", price_eur:34.90, purity:"99% + HPLC", in_stock:false, description:"Analogo sintetico della tuftsina, oggetto di ricerca per equilibrio, concentrazione e gestione dello stress.", sequence:"Thr-Lys-Pro-Arg-Pro-Gly-Pro", molecular_weight:"751,9 g/mol", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430716/selank_fbeaps.png" },
+  { id:6, name:"Semax", slug:"semax", category:"Funzione Cognitiva", price_eur:34.90, purity:"99% + HPLC", in_stock:false, description:"Peptide derivato dall'ACTH(4-10), studiato per il supporto cognitivo, la memoria e la chiarezza mentale.", sequence:"Met-Glu-His-Phe-Pro-Gly-Pro", molecular_weight:"813,9 g/mol", batch:"", coa_date:"", coa_url:"", image_url:"https://res.cloudinary.com/dvv175bck/image/upload/v1790430715/semax_qpxosb.png" }
+];
+
+const ALL_CATS = "Tutti i composti";
+const CATEGORIES = ["Recupero e Rigenerazione","Longevità","Funzione Cognitiva","Salute Metabolica"];
+const PURITIES = ["99% + HPLC","98% + HPLC"];
+const PRICE_MIN = 10;
+const PRICE_MAX = 150;
+const eur = (n) => n.toLocaleString("it-IT", { style:"currency", currency:"EUR" });
+const HERO_IMG = "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/574add560_generated_7fb9aa76.jpg";
+const VERIFIED_IMG = "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/9c2f49ebf_generated_5c0a28fd.jpg";
+const CAT_IMGS = {
+  "Recupero e Riparazione": "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/a27606dde_generated_c50499f3.jpg",
+  "Longevità e Salute Cellulare": "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/6476a46e6_generated_d8ef49e3.jpg",
+  "Ottimizzazione Metabolica": "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/e77e868f0_generated_64aab5dd.jpg",
+  "Supporto Cognitivo": "https://media.base44.com/images/public/6ab4efd96a4bab4603b5483c/78fc337c8_generated_5609d197.jpg"
+};
+
+const METRICS = [
+  { value:"99%", label:"Purezza verificata HPLC" },
+  { value:"COA", label:"per lotto, verificato Janoshik" },
+  { value:"39+", label:"Test di sterilità ed endotossine" },
+  { value:"245", label:"Imballaggio discreto e privacy garantita" }
+];
+
+const CATEGORIES_CARDS = [
+  { title:"Recupero e Riparazione", description:"Peptidi avanzati che supportano la rigenerazione dei tessuti e la riparazione cellulare." },
+  { title:"Longevità e Salute Cellulare", description:"Peptidi che promuovono vitalità cellulare, resilienza e benessere a lungo termine." },
+  { title:"Ottimizzazione Metabolica", description:"Peptidi che aiutano a sostenere la funzione metabolica e un equilibrio ottimale." },
+  { title:"Supporto Cognitivo", description:"Formulazioni mirate per supportare concentrazione, lucidità e prestazioni mentali." }
+];
+const FEATURES = ["Peptidi liofilizzati per la massima stabilità","Catena del freddo mantenuta (quando necessario)","Imballaggio neutro e discreto"];
+
+const POLICY_ORDER = ["privacy","cookie","termini","spedizioni","resi","disclaimer"];
+const POLICIES = {
+  privacy: {
+    title:"Privacy Policy", nav:"Privacy", label:"Protezione dei dati",
+    intro:"Come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali, nel rispetto del Regolamento UE 2016/679 (GDPR).",
+    sections:[
+      { h:"Titolare del trattamento", p:[`Il titolare del trattamento dei dati è PeptidesValtellina. Per qualsiasi richiesta relativa alla privacy puoi scriverci a ${CONTACT_EMAIL}.`] },
+      { h:"Dati che raccogliamo", list:["Dati di contatto: nome, cognome, indirizzo email, numero di telefono.","Dati di consegna: indirizzo di spedizione e informazioni utili alla consegna.","Dati relativi agli ordini: prodotti richiesti, importi e storico delle comunicazioni.","Dati tecnici: indirizzo IP, tipo di browser e dati di navigazione anonimi."] },
+      { h:"Finalità del trattamento", list:["Gestire richieste, ordini e consegne.","Rispondere alle tue domande e fornire assistenza.","Inviare la newsletter, solo se hai dato il tuo consenso.","Adempiere agli obblighi di legge, contabili e fiscali."] },
+      { h:"Base giuridica", p:["Trattiamo i dati per l'esecuzione di un contratto o di misure precontrattuali, per adempiere a obblighi di legge, sulla base del tuo consenso (ad esempio per la newsletter) e sul nostro legittimo interesse a garantire la sicurezza del sito."] },
+      { h:"Conservazione dei dati", p:["I dati vengono conservati per il tempo strettamente necessario alle finalità indicate e, per i dati fiscali, per il periodo previsto dalla legge (10 anni). I dati della newsletter vengono conservati fino alla revoca del consenso."] },
+      { h:"Condivisione con terzi", p:["Non vendiamo né cediamo i tuoi dati. Possono essere comunicati solo a fornitori strettamente necessari al servizio (ad esempio corrieri, servizi di pagamento, hosting), nominati responsabili del trattamento."] },
+      { h:"I tuoi diritti", p:["In qualsiasi momento puoi esercitare i diritti previsti dagli articoli 15-22 del GDPR:"], list:["accesso, rettifica e cancellazione dei dati;","limitazione e opposizione al trattamento;","portabilità dei dati;","revoca del consenso in qualsiasi momento;","reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it)."] }
+    ]
+  },
+  cookie: {
+    title:"Cookie Policy", nav:"Cookie", label:"Tecnologie di tracciamento",
+    intro:"Informazioni sui cookie e sulle tecnologie simili utilizzate da questo sito.",
+    sections:[
+      { h:"Cosa sono i cookie", p:["I cookie sono piccoli file di testo che i siti visitati salvano sul tuo dispositivo, per poi essere riletti alle visite successive."] },
+      { h:"Cookie tecnici", p:["Utilizziamo esclusivamente cookie tecnici e strumenti necessari al corretto funzionamento del sito, ad esempio per il caricamento dei caratteri e delle immagini. Questi cookie non richiedono il tuo consenso."] },
+      { h:"Servizi di terze parti", list:["Google Fonts, per la visualizzazione dei caratteri tipografici.","Cloudinary, per l'hosting e la distribuzione delle immagini dei prodotti."] },
+      { h:"Cookie di profilazione", p:["Il sito non utilizza cookie di profilazione né cookie pubblicitari. Se in futuro verranno introdotti, ti verrà chiesto un consenso esplicito tramite un apposito banner."] },
+      { h:"Come gestire i cookie", p:["Puoi bloccare o cancellare i cookie in qualsiasi momento dalle impostazioni del tuo browser. La disattivazione dei cookie tecnici potrebbe compromettere alcune funzionalità del sito."] }
+    ]
+  },
+  termini: {
+    title:"Termini e Condizioni", nav:"Termini e condizioni", label:"Condizioni di vendita",
+    intro:"Le condizioni che regolano l'utilizzo del sito e l'acquisto dei nostri composti di ricerca.",
+    sections:[
+      { h:"Oggetto", p:["I presenti termini disciplinano l'utilizzo del sito PeptidesValtellina e la vendita dei composti presenti nel catalogo. Effettuando un ordine accetti integralmente queste condizioni."] },
+      { h:"Uso esclusivo per ricerca", p:["Tutti i prodotti sono venduti esclusivamente a scopo di ricerca scientifica e di laboratorio. Non sono farmaci, integratori alimentari o cosmetici e non sono destinati al consumo umano o animale."] },
+      { h:"Requisiti dell'acquirente", list:["Avere almeno 18 anni.","Utilizzare i prodotti solo in contesti di ricerca idonei.","Fornire dati veritieri e completi al momento dell'ordine."] },
+      { h:"Prezzi e pagamenti", p:["Tutti i prezzi sono espressi in euro (€) e includono l'IVA, se dovuta. Ci riserviamo il diritto di modificare prezzi e disponibilità in qualsiasi momento; resta valido il prezzo indicato al momento della conferma dell'ordine."] },
+      { h:"Disponibilità", p:["I prodotti contrassegnati come «Esaurito · In riassortimento» non possono essere ordinati. Puoi contattarci per sapere quando torneranno disponibili."] },
+      { h:"Responsabilità", p:["PeptidesValtellina non è responsabile per un utilizzo improprio dei prodotti o non conforme alle presenti condizioni. L'acquirente si assume ogni responsabilità relativa alla manipolazione, conservazione e utilizzo dei composti."] },
+      { h:"Legge applicabile", p:["I presenti termini sono regolati dalla legge italiana. Per i consumatori resta ferma la competenza del foro di residenza previsto dal Codice del Consumo (D.Lgs. 206/2005)."] }
+    ]
+  },
+  spedizioni: {
+    title:"Spedizioni e Consegne", nav:"Spedizioni", label:"Logistica",
+    intro:"Tempi, modalità e cura con cui prepariamo e consegniamo ogni ordine.",
+    sections:[
+      { h:"Area di consegna", p:["Consegniamo principalmente in tutta la provincia di Sondrio (Valtellina e Valchiavenna). Per consegne al di fuori della provincia contattaci prima di effettuare l'ordine."] },
+      { h:"Tempi di preparazione", p:["Gli ordini vengono preparati di norma entro 1-2 giorni lavorativi dalla conferma. Riceverai una comunicazione quando l'ordine sarà pronto per la consegna."] },
+      { h:"Imballaggio", list:["Imballaggio neutro e discreto, senza riferimenti al contenuto.","Peptidi liofilizzati sigillati per garantire stabilità durante il trasporto.","Catena del freddo mantenuta quando richiesto dal composto."] },
+      { h:"Costi di consegna", p:["Gli eventuali costi di consegna vengono comunicati prima della conferma dell'ordine."] },
+      { h:"Problemi con la consegna", p:[`Se il pacco arriva danneggiato o incompleto, scrivici entro 48 ore dalla ricezione a ${CONTACT_EMAIL} allegando alcune foto: troveremo insieme la soluzione migliore.`] }
+    ]
+  },
+  resi: {
+    title:"Resi e Rimborsi", nav:"Resi e rimborsi", label:"Assistenza post-vendita",
+    intro:"Cosa fare se qualcosa non va con il tuo ordine.",
+    sections:[
+      { h:"Diritto di recesso", p:["Se sei un consumatore puoi recedere dall'acquisto entro 14 giorni dalla consegna, senza indicarne il motivo, purché il prodotto sia integro, sigillato e nella confezione originale."] },
+      { h:"Esclusioni", p:["Per ragioni igieniche e di sicurezza, il diritto di recesso è escluso per i prodotti sigillati che sono stati aperti dopo la consegna (art. 59, lett. e, Codice del Consumo)."] },
+      { h:"Prodotti danneggiati o errati", p:["Se ricevi un prodotto danneggiato, difettoso o diverso da quello ordinato, provvederemo alla sostituzione o al rimborso completo, senza costi aggiuntivi per te."] },
+      { h:"Come richiedere un reso", list:[`Scrivi a ${CONTACT_EMAIL} indicando numero d'ordine e motivo della richiesta.`,"Ti invieremo le istruzioni per la restituzione.","Una volta ricevuto e verificato il prodotto, confermeremo il reso."] },
+      { h:"Tempi di rimborso", p:["Il rimborso viene effettuato entro 14 giorni dalla ricezione del reso, con lo stesso metodo di pagamento utilizzato per l'acquisto."] }
+    ]
+  },
+  disclaimer: {
+    title:"Disclaimer", nav:"Disclaimer", label:"Avvertenze",
+    intro:"Informazioni importanti sull'utilizzo dei composti presenti nel catalogo.",
+    sections:[
+      { h:"Solo a scopo di ricerca", p:["Tutti i prodotti venduti da PeptidesValtellina sono destinati esclusivamente alla ricerca scientifica in vitro e in laboratorio. Non sono destinati al consumo umano o animale."] },
+      { h:"Non sono farmaci", p:["I nostri composti non sono farmaci, integratori o cosmetici e non sono stati approvati da alcuna autorità sanitaria per diagnosticare, trattare, curare o prevenire malattie."] },
+      { h:"Informazioni sul sito", p:["Le descrizioni presenti sul sito hanno finalità esclusivamente informative e si riferiscono alla letteratura scientifica disponibile. Non costituiscono in alcun modo un consiglio medico."] },
+      { h:"Responsabilità dell'acquirente", p:["Acquistando i nostri prodotti dichiari di avere almeno 18 anni e di essere qualificato per la manipolazione di composti di ricerca, assumendoti ogni responsabilità relativa al loro utilizzo."] }
+    ]
+  }
+};
+
+const $ = (s, el=document) => el.querySelector(s);
+const el = (tag, props={}, ...children) => {
+  const e = document.createElement(tag);
+  Object.entries(props).forEach(([k,v]) => {
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else e.setAttribute(k, v);
+  });
+  children.flat().forEach(c => { if (c == null || c === false) return; e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return e;
+};
+const svg = (paths, size=16) => {
+  const s = document.createElementNS("http://www.w3.org/2000/svg","svg");
+  s.setAttribute("width",size); s.setAttribute("height",size); s.setAttribute("viewBox","0 0 24 24");
+  s.setAttribute("fill","none"); s.setAttribute("stroke","currentColor"); s.setAttribute("stroke-width","2");
+  s.setAttribute("stroke-linecap","round"); s.setAttribute("stroke-linejoin","round");
+  paths.forEach(d => { const p = document.createElementNS("http://www.w3.org/2000/svg","path"); p.setAttribute("d", d); s.appendChild(p); });
+  return s;
+};
+const arrow = () => svg(["M5 12h14M12 5l7 7-7 7"], 16);
+const arrowR = () => svg(["M5 12h14M12 5l7 7-7 7"], 16);
+const fileCheck = () => svg(["M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z","M14 2v6h6","M9 15l2 2 4-4"], 16);
+const qr = () => svg(["M3 3h7v7H3z","M14 3h7v7h-7z","M3 14h7v7H3z","M14 14h3v3h-3z","M20 14h1v1h-1z","M14 20h3v1h-3z","M20 20h1v1h-1z","M17 17h4v4h-4z"], 16);
+const shield = () => svg(["M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z","m9 12 2 2 4-4"], 13);
+const back = () => svg(["m12 19-7-7 7-7M19 12H5"], 16);
+const searchIcon = () => svg(["m21 21-4.3-4.3","M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"], 15);
+const sliders = () => svg(["M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"], 18);
+const heart = () => svg(["M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"], 15);
+const mail = () => svg(["M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z","m22 6-10 7L2 6"], 16);
+
+function navbar() {
+  return el("header", { class: "nav", id: "nav" },
+    el("div", { class: "nav-inner" },
+      el("a", { class: "brand", href: "#/", onclick: (e)=>{e.preventDefault(); route("/");} },
+        el("span", { class: "name" }, "PeptidesValtellina"),
+        el("span", { class: "tag" }, "/ lab")
+      ),
+      el("div", { class: "nav-links" },
+        el("a", { href: "#/products", onclick: (e)=>{e.preventDefault(); route("/products");} }, "Composti"),
+        el("a", { href: "#/#categories", onclick: (e)=>{e.preventDefault(); route("/"); setTimeout(()=>scrollToId("categories"),50);} }, "Categorie"),
+        el("a", { href: "#/certificati", onclick: (e)=>{e.preventDefault(); route("/certificati");} }, "Certificati"),
+        el("a", { href: "#/#about", onclick: (e)=>{e.preventDefault(); route("/"); setTimeout(()=>scrollToId("about"),50);} }, "Chi siamo"),
+        <!--el("a", { class:"btn-green", href: "#/products", onclick: (e)=>{e.preventDefault(); route("/products");} }, "View Compounds NO")-->
+      )
+    )
+  );
+}
+
+function hero() {
+  return el("section", { class:"hero" },
+    el("div", { class:"hero-bg" }, el("img", { src: HERO_IMG, alt:"Render astratto di una molecola" })),
+    el("div", { class:"ticker left" }, "C142H238N42O42 · Verificato HPLC · Tracciabile"),
+    el("div", { class:"ticker right" }, "Lotto · COA · Sterilità · Endotossine"),
+    el("div", { class:"hero-content" },
+      el("p", { class:"label" }, "Peptidi di ricerca di grado farmaceutico"),
+      el("h1", {},
+        document.createTextNode("Peptidi dalla Valtellina pronti all'utilizzo."),
+        el("br"),
+        el("span", { class:"accent" }, "Qualità e consegna unici in tutta la provincia.")
+      ),
+      el("p", { class:"sub" }, "Peptidi di ricerca di grado farmaceutico con purezza verificata, COA per ogni lotto e tracciabilità completa."),
+      el("div", { class:"hero-cta" },
+        el("a", { class:"btn-primary", href:"#/products", onclick:(e)=>{e.preventDefault();route("/products");} }, "Scopri i composti ", arrow()),
+        el("a", { class:"btn-outline", href:"#/certificati", onclick:(e)=>{e.preventDefault();route("/certificati");} }, fileCheck(), " Verifica un lotto")
+      )
+    )
+  );
+}
+
+function metricBar() {
+  const grid = el("div", { class:"metrics-grid" });
+  METRICS.forEach((m,i) => grid.appendChild(el("div", { class:"metric" + (i?"":"") }, el("div",{class:"val"},m.value), el("div",{class:"lbl"},m.label))));
+  return el("section", { class:"metrics" }, grid);
+}
+
+function productCard(p) {
+  return el("a", { class:"pcard", href:`#/products/${p.slug}`, onclick:(e)=>{e.preventDefault();route(`/products/${p.slug}`);} },
+    el("div", { class:"imgwrap" },
+      el("img", { src:p.image_url, alt:p.name }),
+      el("span", { class:"purity" }, p.purity),
+      p.in_stock ? null : el("span", { class:"oos" }, OOS_LABEL)
+    ),
+    el("h3", {}, p.name),
+    el("p", { class:"price" }, `Da ${eur(p.price_eur)}`)
+  );
+}
+
+function productCarousel() {
+  const grid = el("div", { class:"product-grid" });
+  PRODUCTS.slice(0,4).forEach(p => grid.appendChild(productCard(p)));
+  return el("section", { class:"section" },
+    el("div", { class:"container" },
+      el("div", { class:"sec-head" },
+        el("span", { class:"label" }, "La libreria"),
+        el("h2", {}, "I nostri composti di ricerca"),
+        el("p", {}, "Peptidi selezionati con cura, con purezza documentata e tracciabilità completa.")
+      ),
+      grid,
+      el("div", { class:"center-btn" },
+        el("a", { class:"btn-outline", href:"#/products", onclick:(e)=>{e.preventDefault();route("/products");} }, "Vedi tutti i prodotti ", arrow())
+      )
+    )
+  );
+}
+
+function categoryCards() {
+  const grid = el("div", { class:"cat-grid" });
+  CATEGORIES_CARDS.forEach(c => {
+    grid.appendChild(el("div", { class:"catcard" },
+      el("div", { class:"imgwrap" }, el("img", { src: CAT_IMGS[c.title], alt:c.title })),
+      el("h3", {}, c.title),
+      el("p", {}, c.description),
+      el("a", { class:"explore", href:"#/products", onclick:(e)=>{e.preventDefault();route("/products");} }, "Esplora ", arrow())
+    ));
+  });
+  const feats = el("div", { class:"feat-list" });
+  FEATURES.forEach(f => feats.appendChild(el("div",{class:"item"}, el("span",{class:"dot"}), f)));
+  return el("section", { class:"section cat-section", id:"categories" },
+    el("div", { class:"container" },
+      el("div", { class:"sec-head" },
+        el("span", { class:"label" }, "Protocolli"),
+        el("h2", {}, "Pensati per la ricerca e per protocolli orientati alla performance")
+      ),
+      grid,
+      feats
+    )
+  );
+}
+
+function verifiedSection() {
+  return el("section", { class:"section verified", id:"verified" },
+    el("div", { class:"container" },
+      el("div", { class:"verified-grid" },
+        el("div", { class:"order-1" },
+          el("span", { class:"label" }, "Controllo qualità"),
+          el("h2", {}, "Verificato. Documentato. Trasparente."),
+          el("p", {}, "Ogni lotto viene sottoposto a cromatografia liquida ad alte prestazioni (HPLC-MS), analisi delle endotossine e convalida della sterilità. I certificati di analisi sono pubblici e verificabili."),
+          (() => { const g = el("div",{class:"vmetrics"}); [["HPLC-MS","Purezza"],["LAL","Endotossine"],["USP","Sterilità"]].forEach(([v,l])=>g.appendChild(el("div",{}, el("div",{class:"val"},v), el("div",{class:"lbl"},l)))); return g; })(),
+          el("a", { class:"btn-primary", href:"#/certificati", style:"margin-top:32px;display:inline-flex;", onclick:(e)=>{e.preventDefault();route("/certificati");} }, "Vai ai certificati ", arrow())
+        ),
+        el("div", {},
+          el("div", { class:"imgwrap" }, el("img", { src: VERIFIED_IMG, alt:"Verificato" }))
+        )
+      )
+    )
+  );
+}
+
+function footer() {
+  const form = el("form", { onsubmit:(e)=>{e.preventDefault(); const i=$("input",form); if(i.value){form.querySelector(".news-sent").classList.remove("hidden"); i.value="";} } },
+    el("div", { class:"news-input" },
+      el("input", { type:"email", placeholder:"tua@email.it", required:"" }),
+      el("button", { type:"submit", "aria-label":"Iscriviti" }, arrow())
+    ),
+    el("p", { class:"news-sent hidden" }, "Iscrizione completata. Benvenuto in laboratorio.")
+  );
+  const cols = el("div", { class:"footer-cols" });
+  cols.appendChild(el("div", { class:"footer-brand" }, el("h4",{class:"brand-h"},"PeptidesValtellina"), el("p",{},"Molecole tracciabili. Peptidi di ricerca di grado farmaceutico.")));
+  const mkCol = (title, items) => {
+    const ul = el("ul", {});
+    items.forEach(([label, path, anchor]) => {
+      const external = path.startsWith("mailto:");
+      ul.appendChild(el("li",{}, el("a",{ href: external ? path : "#"+path, onclick:(e)=>{ if (external) return; e.preventDefault(); route(path); if (anchor) setTimeout(()=>scrollToId(anchor),50); } }, label)));
+    });
+    return el("div", {}, el("h4",{},title), ul);
+  };
+  cols.appendChild(mkCol("Esplora", [["Composti","/products"],["Categorie","/","categories"],["Verifica","/","verified"]]));
+  cols.appendChild(mkCol("Laboratorio", [["Certificati","/certificati"],["Metodi","/","verified"],["Contatti",`mailto:${CONTACT_EMAIL}`]]));
+  cols.appendChild(mkCol("Legale", POLICY_ORDER.map(k => [POLICIES[k].nav, `/policy/${k}`])));
+  return el("footer", { id:"about" },
+    el("div", { class:"container" },
+      el("div", { class:"footer-top" },
+        el("div", {}, el("h2",{},document.createTextNode("Novità"),el("br"),"dal lab."), el("p",{class:"sub-p"},"Iscriviti per ricevere aggiornamenti su nuovi lotti, nuovi composti e ricerche sui protocolli.")),
+        el("div", { class:"news-form" }, form)
+      ),
+      cols,
+      el("div", { class:"footer-bottom" },
+        el("p", {}, "© 2026 PeptidesValtellina · Solo a scopo di ricerca"),
+        el("p", {}, "Pensato per la ricerca e protocolli orientati alla performance")
+      )
+    )
+  );
+}
+
+function homeView() {
+  const app = $("#app");
+  app.innerHTML = "";
+  app.appendChild(navbar());
+  app.appendChild(hero());
+  app.appendChild(metricBar());
+  app.appendChild(productCarousel());
+  app.appendChild(categoryCards());
+  app.appendChild(verifiedSection());
+  app.appendChild(footer());
+  attachScroll();
+}
+
+const defaultFilters = () => ({ search:"", cats:[ALL_CATS], purity:[], inStock:false, maxPrice:PRICE_MAX });
+let filterState = defaultFilters();
+
+function productsView() {
+  const app = $("#app");
+  app.innerHTML = "";
+  app.appendChild(navbar());
+
+  const counts = {};
+  CATEGORIES.forEach(c => counts[c] = PRODUCTS.filter(p=>p.category===c).length);
+
+  const main = el("div", { class:"page-pad" },
+    el("div", { class:"container" },
+      el("div", { class:"page-head" },
+        el("span", { class:"label" }, "Il catalogo"),
+        el("h1", {}, "Composti di ricerca")
+      ),
+      el("div", { class:"catalog-grid" },
+        sidebar(counts),
+        gridArea(),
+        rightCol()
+      )
+    )
+  );
+  app.appendChild(main);
+  app.appendChild(footer());
+  attachScroll();
+  renderCards();
+}
+
+function sidebar(counts) {
+  const sb = el("aside", { class:"sidebar" });
+  sb.appendChild(el("h3", {}, "Filtri", el("button",{class:"clear", onclick:()=>{filterState=defaultFilters(); productsView();}}, "Azzera tutto")));
+  const s = el("div", { class:"search" }, searchIcon());
+  const inp = el("input", { type:"text", placeholder:"Cerca composti...", value:filterState.search, oninput:(e)=>{filterState.search=e.target.value; renderCards();} });
+  s.appendChild(inp);
+  sb.appendChild(s);
+
+  const cg = el("div", { class:"filter-group" }, el("h4",{},"Categorie"));
+  const opts = el("div", { class:"opts" });
+  const allL = el("label", {}, el("input",{type:"checkbox", checked:filterState.cats.includes(ALL_CATS), onchange:(e)=>{if(e.target.checked)filterState.cats=[ALL_CATS]; else filterState.cats=filterState.cats.filter(c=>c!==ALL_CATS); productsView();}}), ALL_CATS);
+  opts.appendChild(allL);
+  CATEGORIES.forEach(c => {
+    opts.appendChild(el("label", {},
+      el("input", { type:"checkbox", checked:filterState.cats.includes(c), onchange:(e)=>{ const next=filterState.cats.filter(x=>x!==ALL_CATS); if(e.target.checked)next.push(c); else next.splice(next.indexOf(c),1); filterState.cats=next.length?next:[ALL_CATS]; productsView(); } }),
+      document.createTextNode(c + " "), el("span",{class:"count"}, `(${counts[c]||0})`)
+    ));
+  });
+  cg.appendChild(opts);
+  sb.appendChild(cg);
+
+  const pg = el("div", { class:"filter-group" }, el("h4",{},"Purezza"));
+  const popts = el("div",{class:"opts"});
+  PURITIES.forEach(p => {
+    popts.appendChild(el("label", {},
+      el("input", { type:"checkbox", checked:filterState.purity.includes(p), onchange:(e)=>{ if(e.target.checked)filterState.purity.push(p); else filterState.purity=filterState.purity.filter(x=>x!==p); renderCards(); } }),
+      p
+    ));
+  });
+  pg.appendChild(popts);
+  sb.appendChild(pg);
+
+  const rg = el("div", { class:"filter-group" }, el("h4",{},"Fascia di prezzo"),
+    el("input", { class:"range", type:"range", min:PRICE_MIN, max:PRICE_MAX, step:5, value:filterState.maxPrice, oninput:(e)=>{filterState.maxPrice=+e.target.value; $(".range-vals span:last-child").textContent=eur(filterState.maxPrice); renderCards();} }),
+    el("div", { class:"range-vals" }, el("span",{},eur(PRICE_MIN)), el("span",{},eur(filterState.maxPrice)))
+  );
+  sb.appendChild(rg);
+
+  const av = el("div", { class:"filter-group" },
+    el("label", {}, el("input", { type:"checkbox", checked:filterState.inStock, onchange:(e)=>{filterState.inStock=e.target.checked; renderCards();} }), "Solo disponibili")
+  );
+  sb.appendChild(av);
+
+  sb.appendChild(el("div", { class:"coa-box" }, sliders(), el("p",{},"Tutti i composti sono accompagnati da un COA verificabile.")));
+  return sb;
+}
+
+function gridArea() {
+  return el("div", { class:"grid-area" },
+    el("p", { class:"count", id:"count" }, `${PRODUCTS.length} composti`),
+    el("div", { class:"catalog-cards", id:"cards" })
+  );
+}
+
+function rightCol() {
+  return el("aside", { class:"right-col" },
+    el("div", { class:"sticky" },
+      el("h3", {}, "Verificato. Documentato. Trasparente."),
+      el("p", {}, "Ogni lotto viene sottoposto a cromatografia liquida ad alte prestazioni (HPLC-MS), analisi delle endotossine e convalida della sterilità. I certificati di analisi sono pubblici e verificabili."),
+      el("a", { class:"btn-teal", href:"#/certificati", onclick:(e)=>{e.preventDefault();route("/certificati");} }, "Vai ai certificati"),
+      el("div", { class:"rcimg" }, el("img", { src: VERIFIED_IMG, alt:"Verifica" })),
+      el("p", { class:"foot-label" }, "Pensato per la ricerca e protocolli orientati alla performance")
+    )
+  );
+}
+
+function renderCards() {
+  const cards = $("#cards");
+  if (!cards) return;
+  cards.innerHTML = "";
+  const filtered = PRODUCTS.filter(p => {
+    if (filterState.search && !p.name.toLowerCase().includes(filterState.search.toLowerCase())) return false;
+    if (!filterState.cats.includes(ALL_CATS) && !filterState.cats.includes(p.category)) return false;
+    if (filterState.purity.length && !filterState.purity.includes(p.purity)) return false;
+    if (filterState.inStock && !p.in_stock) return false;
+    if (p.price_eur > filterState.maxPrice) return false;
+    return true;
+  });
+  const c = $("#count");
+  if (c) c.textContent = filtered.length === 1 ? "1 composto" : `${filtered.length} composti`;
+  filtered.forEach(p => {
+    cards.appendChild(el("a", { class:"ccard", href:`#/products/${p.slug}`, onclick:(e)=>{e.preventDefault();route(`/products/${p.slug}`);} },
+      el("div", { class:"imgwrap" },
+        el("img", { src:p.image_url, alt:p.name }),
+        el("button", { class:"heart", "aria-label":"Aggiungi ai preferiti", onclick:(e)=>{e.preventDefault();e.stopPropagation();} }, heart()),
+        p.in_stock ? null : el("span", { class:"oos" }, OOS_LABEL)
+      ),
+      el("h3", {}, p.name),
+      el("p", { class:"price" }, `Da ${eur(p.price_eur)}`)
+    ));
+  });
+}
+
+function detailView(slug) {
+  const p = PRODUCTS.find(x => x.slug === slug);
+  const app = $("#app");
+  app.innerHTML = "";
+  app.appendChild(navbar());
+  if (!p) {
+    app.appendChild(el("div",{class:"page-pad"}, el("div",{class:"container"},
+      el("p",{},"Composto non trovato."),
+      el("a",{class:"btn-primary",style:"margin-top:24px;",href:"#/products",onclick:(e)=>{e.preventDefault();route("/products");}},"Torna ai composti")
+    )));
+    app.appendChild(footer());
+    attachScroll();
+    return;
+  }
+  const left = el("div", { class:"detail-left" },
+    el("div", { class:"main-img" }, el("img", { src:p.image_url, alt:p.name })),
+    el("div", { class:"thumbs" }, [0,1,2,3].map(()=>el("div",{class:"t"}, el("img",{src:p.image_url,alt:""}))))
+  );
+  const dmetrics = el("div", { class:"dmetrics" });
+  METRICS.forEach(m => dmetrics.appendChild(el("div",{}, el("div",{class:"val"},m.value), el("div",{class:"lbl"},m.label))));
+  const openCoa = () => { if (p.coa_url) window.open(p.coa_url, "_blank", "noopener"); else route("/certificati"); };
+  const right = el("div", { class:"detail-right" },
+    el("a", { class:"back", href:"#/products", onclick:(e)=>{e.preventDefault();route("/products");} }, back(), " Torna ai composti"),
+    el("span", { class:"label" }, p.category),
+    el("h1", {}, `Acquista ${p.name}`),
+    el("p", { class:"dprice" }, eur(p.price_eur)),
+    el("p", { class:"desc" }, p.description),
+    el("div", { class:"spec-table" },
+      el("div",{class:"spec-row"}, el("span",{class:"k"},"Sequenza"), el("span",{class:"v mono"},p.sequence)),
+      el("div",{class:"spec-row"}, el("span",{class:"k"},"Peso molecolare"), el("span",{class:"v"},p.molecular_weight)),
+      el("div",{class:"spec-row"}, el("span",{class:"k"},"Purezza"), el("span",{class:"v"},p.purity)),
+      el("div",{class:"spec-row"}, el("span",{class:"k"},"Disponibilità"), el("span",{class:"v", style:p.in_stock?"color:#047857":"color:#e11d48"}, p.in_stock?"Disponibile":OOS_LABEL))
+    ),
+    el("button", { class:"req-btn", disabled: !p.in_stock }, p.in_stock ? "Richiedi informazioni" : "In riassortimento"),
+    dmetrics,
+    el("div", { class:"coa-card" },
+      el("div", { class:"head" }, fileCheck(),
+        el("div", {}, el("div",{class:"tag"},"COA"), el("div",{class:"title"},"Certificato di analisi"))
+      ),
+      el("div", { class:"btns" },
+        el("button", { onclick: openCoa }, fileCheck(), " Vedi COA"),
+        el("button", { onclick: ()=>route("/certificati") }, qr(), " Scansiona QR")
+      ),
+      el("p", { class:"note" }, shield(), " Verificato Janoshik · accessibile pubblicamente")
+    )
+  );
+  app.appendChild(el("div",{class:"page-pad"}, el("div",{class:"container"}, el("div",{class:"detail-grid"}, left, right))));
+  app.appendChild(footer());
+  attachScroll();
+}
+
+function certificatesView() {
+  const app = $("#app");
+  app.innerHTML = "";
+  app.appendChild(navbar());
+
+  const steps = el("div", { class:"cert-steps" });
+  [
+    ["01", "Trova il lotto", "Il numero di lotto è stampato sull'etichetta di ogni fiala e sulla confezione."],
+    ["02", "Apri il certificato", "Seleziona il composto qui sotto e apri il COA corrispondente al tuo lotto."],
+    ["03", "Verifica online", "Ogni certificato riporta un codice univoco verificabile sul sito del laboratorio Janoshik."]
+  ].forEach(([n, h, t]) => steps.appendChild(el("div", { class:"cert-step" }, el("span",{class:"n"},n), el("h3",{},h), el("p",{},t))));
+
+  const grid = el("div", { class:"cert-grid" });
+  PRODUCTS.forEach(p => {
+    const hasCoa = !!p.coa_url;
+    grid.appendChild(el("div", { class:"cert-card" },
+      el("div", { class:"top" },
+        el("div", { class:"thumb" }, el("img", { src:p.image_url, alt:p.name })),
+        el("div", {}, el("div",{class:"cat"},p.category), el("h3",{},p.name))
+      ),
+      el("div", { class:"spec-table" },
+        el("div",{class:"spec-row"}, el("span",{class:"k"},"Lotto"), el("span",{class:"v mono"}, p.batch || "In aggiornamento")),
+        el("div",{class:"spec-row"}, el("span",{class:"k"},"Data analisi"), el("span",{class:"v"}, p.coa_date || "In aggiornamento")),
+        el("div",{class:"spec-row"}, el("span",{class:"k"},"Purezza"), el("span",{class:"v"}, p.purity)),
+        el("div",{class:"spec-row"}, el("span",{class:"k"},"Laboratorio"), el("span",{class:"v"}, "Janoshik Analytical")),
+        el("div",{class:"spec-row"}, el("span",{class:"k"},"Stato"), el("span",{class:"v", style:hasCoa?"color:#047857":"color:#78716c"}, hasCoa ? "Verificato" : "Certificato in arrivo"))
+      ),
+      el("div", { class:"cert-actions" },
+        el("a", { class:"primary" + (hasCoa ? "" : " disabled"), href: p.coa_url || "#", target:"_blank", rel:"noopener" }, fileCheck(), hasCoa ? " Apri COA" : " In arrivo"),
+        el("a", { class:"ghost", href:`#/products/${p.slug}`, onclick:(e)=>{e.preventDefault();route(`/products/${p.slug}`);} }, "Prodotto ", arrow())
+      )
+    ));
+  });
+
+  app.appendChild(el("div", { class:"page-pad" },
+    el("div", { class:"container" },
+      el("div", { class:"page-head" },
+        el("span", { class:"label" }, "Libreria COA"),
+        el("h1", {}, "Certificati di analisi"),
+        el("p", { class:"page-intro" }, "Ogni lotto viene analizzato da un laboratorio indipendente tramite HPLC-MS, test delle endotossine e convalida della sterilità. Qui trovi i certificati di tutti i nostri composti.")
+      ),
+      steps,
+      grid,
+      el("div", { class:"cert-cta" },
+        el("h2", {}, "Non trovi il certificato del tuo lotto?"),
+        el("p", {}, "Scrivici indicando il nome del composto e il numero di lotto: ti invieremo il certificato corrispondente."),
+        el("a", { href:`mailto:${CONTACT_EMAIL}?subject=Richiesta%20certificato%20COA` }, mail(), " Richiedi un certificato")
+      )
+    )
+  ));
+  app.appendChild(footer());
+  attachScroll();
+}
+
+function policyView(key) {
+  const policy = POLICIES[key];
+  if (!policy) { route("/policy/privacy"); return; }
+  const app = $("#app");
+  app.innerHTML = "";
+  app.appendChild(navbar());
+
+  const nav = el("nav", { class:"legal-nav" }, el("h4", {}, "Documenti legali"));
+  POLICY_ORDER.forEach(k => nav.appendChild(
+    el("a", { class: k === key ? "active" : "", href:`#/policy/${k}`, onclick:(e)=>{e.preventDefault();route(`/policy/${k}`);} }, POLICIES[k].nav)
+  ));
+
+  const body = el("div", { class:"legal-body" },
+    el("p", { class:"updated" }, `Ultimo aggiornamento: ${LAST_UPDATE}`),
+    policy.sections.map(s => el("section", {},
+      el("h2", {}, s.h),
+      (s.p || []).map(t => el("p", {}, t)),
+      s.list ? el("ul", {}, s.list.map(t => el("li", {}, t))) : null
+    )),
+    el("div", { class:"legal-note" }, mail(),
+      el("span", {}, "Per qualsiasi domanda su questo documento scrivici a ", el("a", { href:`mailto:${CONTACT_EMAIL}` }, CONTACT_EMAIL), ".")
+    )
+  );
+
+  app.appendChild(el("div", { class:"page-pad" },
+    el("div", { class:"container" },
+      el("div", { class:"page-head" },
+        el("span", { class:"label" }, policy.label),
+        el("h1", {}, policy.title),
+        el("p", { class:"page-intro" }, policy.intro)
+      ),
+      el("div", { class:"legal-grid" }, nav, body)
+    )
+  ));
+  app.appendChild(footer());
+  attachScroll();
+}
+
+function scrollToId(id) {
+  const t = document.getElementById(id);
+  if (t) t.scrollIntoView({ behavior:"smooth" });
+}
+
+function attachScroll() {
+  const nav = $("#nav");
+  const onScroll = () => { if (window.scrollY > 20) nav.classList.add("scrolled"); else nav.classList.remove("scrolled"); };
+  window.addEventListener("scroll", onScroll);
+  onScroll();
+}
+
+function route(path) {
+  window.location.hash = path;
+  render();
+}
+
+function render() {
+  let hash = window.location.hash.replace(/^#/, "") || "/";
+  window.scrollTo(0, 0);
+  if (hash.startsWith("/products/")) {
+    detailView(hash.split("/")[2]);
+  } else if (hash === "/products") {
+    productsView();
+  } else if (hash === "/certificati") {
+    certificatesView();
+  } else if (hash.startsWith("/policy/")) {
+    policyView(hash.split("/")[2]);
+  } else {
+    homeView();
+  }
+}
+
+window.addEventListener("hashchange", render);
+window.addEventListener("DOMContentLoaded", render);
+</script>
+</body>
+</html>
